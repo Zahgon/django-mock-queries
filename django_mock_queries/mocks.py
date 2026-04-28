@@ -35,7 +35,7 @@ def monkey_patch_test_db(disabled_features=None):
 
     # noinspection PyUnusedLocal
     def create_mock_test_db(self, *args, **kwargs):
-        mock_django_connection(disabled_features)
+        pass
 
     # noinspection PyUnusedLocal
     def destroy_mock_test_db(self, *args, **kwargs):
@@ -88,13 +88,7 @@ def mock_django_connection(disabled_features=None):
 
     # noinspection PyUnusedLocal
     def compiler(queryset, using=None, connection=None, elide_empty=True, **kwargs):
-        result = MagicMock(name='mock_connection.ops.compiler()')
-        # noinspection PyProtectedMember
-        result.execute_sql.side_effect = NotSupportedError(
-            "Mock database tried to execute SQL for {} model.".format(
-                queryset.model._meta.object_name))
-        result.has_results.side_effect = result.execute_sql.side_effect
-        return result
+        pass
 
     mock_ops.compiler.return_value.side_effect = compiler
     mock_ops.integer_field_range.return_value = (-sys.maxsize - 1, sys.maxsize)
@@ -111,13 +105,11 @@ class MockMap:
 
     def __set__(self, instance, value):
         """ Set a related object for an instance. """
-
-        self.map[id(instance)] = (weakref.ref(instance), value)
+        pass
 
     def __getattr__(self, name):
         """ Delegate all other calls to the original. """
-
-        return getattr(self.original, name)
+        pass
 
 
 class MockOneToManyMap(MockMap):
@@ -126,23 +118,7 @@ class MockOneToManyMap(MockMap):
 
         If not, create a new set.
         """
-
-        if instance is None:
-            # Call was to the class, not an object.
-            return self
-
-        instance_id = id(instance)
-        entry = self.map.get(instance_id)
-        old_instance = related_objects = None
-        if entry is not None:
-            old_instance_weak, related_objects = entry
-            old_instance = old_instance_weak()
-        if entry is None or old_instance is None:
-            related = getattr(self.original, 'related', self.original)
-            related_objects = MockSet(model=related.field.model)
-            self.__set__(instance, related_objects)
-
-        return related_objects
+        pass
 
 
 class MockOneToOneMap(MockMap):
@@ -151,24 +127,7 @@ class MockOneToOneMap(MockMap):
 
         If not (the default) raise the expected exception.
         """
-
-        if instance is None:
-            # Call was to the class, not an object.
-            return self
-
-        entry = self.map.get(id(instance))
-        old_instance = related_object = None
-        if entry is not None:
-            old_instance_weak, related_object = entry
-            old_instance = old_instance_weak()
-        if entry is None or old_instance is None:
-            raise self.original.RelatedObjectDoesNotExist(
-                "Mock {} has no {}.".format(
-                    owner.__name__,
-                    self.original.related.get_accessor_name()
-                )
-            )
-        return related_object
+        pass
 
 
 def find_all_models(models):
@@ -268,59 +227,31 @@ class PatcherChain:
         self.pass_mocks = pass_mocks
 
     def __call__(self, func):
-        if isinstance(func, type):
-            decorated = self.decorate_class(func)
-        else:
-            decorated = self.decorate_callable(func)
-        # keep the previous class/function name
-        decorated.__name__ = func.__name__
-
-        return decorated
+        pass
 
     def decorate_class(self, cls):
-        for attr in dir(cls):
-            # noinspection PyUnresolvedReferences
-            if not attr.startswith(patch.TEST_PREFIX):
-                continue
-
-            attr_value = getattr(cls, attr)
-            if not hasattr(attr_value, "__call__"):
-                continue
-
-            setattr(cls, attr, self(attr_value))
-        return cls
+        pass
 
     def decorate_callable(self, target):
         """ Called as a decorator. """
-
-        # noinspection PyUnusedLocal
-        def absorb_mocks(test_case, *args):
-            return target(test_case)
-
-        should_absorb = not (self.pass_mocks or isinstance(target, type))
-        result = absorb_mocks if should_absorb else target
-        for patcher in self.patchers:
-            result = patcher(result)
-        return result
+        pass
 
     def __enter__(self):
         """ Starting a context manager.
 
         All the patched objects are passed as a list to the with statement.
         """
-        return [patcher.__enter__() for patcher in self.patchers]
+        pass
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """ Ending a context manager. """
-        for patcher in self.patchers:
-            patcher.__exit__(exc_type, exc_val, exc_tb)
+        pass
 
     def start(self):
-        return [patcher.start() for patcher in self.patchers]
+        pass
 
     def stop(self):
-        for patcher in reversed(self.patchers):
-            patcher.stop()
+        pass
 
 
 class Mocker:
@@ -337,78 +268,34 @@ class Mocker:
         self.inst_original = {}
 
     def __enter__(self):
-        self._patch_object_methods(self.cls, *self.methods)
-        return self
+        pass
 
     def __call__(self, func):
-        def decorated(*args, **kwargs):
-            with self:
-                return func(*((args[0], self) + args[1:]), **kwargs)
-
-        # keep the previous method name
-        decorated.__name__ = func.__name__
-
-        return decorated
+        pass
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        for patcher in self.inst_patchers.values():
-            patcher.stop()
+        pass
 
     def _key(self, method, obj=None):
-        return '{}.{}'.format(obj or self.cls, method)
+        pass
 
     def _method_obj(self, name, obj, *sources):
-        d = {}
-        [d.update(s) for s in sources]
-        return d[self._key(name, obj=obj)]
+        pass
 
     def method(self, name, obj=None):
-        return self._method_obj(name, obj, self.inst_mocks)
+        pass
 
     def original_method(self, name, obj=None):
-        return self._method_obj(name, obj, self.inst_original)
+        pass
 
     def _get_source_method(self, obj, method):
-        source_obj = obj
-        parts = method.split('.')
-
-        source_method = parts[-1]
-        parts = parts[:-1]
-
-        while parts:
-            source_obj = getattr(source_obj, parts[0], None) or getattr(source_obj.model, '_' + parts[0])
-            parts.pop(0)
-
-        return source_obj, source_method
+        pass
 
     def _patch_method(self, method_name, source_obj, source_method):
-        target_name = '_'.join(method_name.split('.'))
-        target_obj = getattr(self, target_name, None)
-
-        if target_obj is None:
-            mock_args = dict(new=MagicMock())
-        elif isinstance(target_obj, MethodType):
-            mock_args = dict(new=MagicMock(autospec=True, side_effect=target_obj))
-        else:
-            mock_args = dict(new=PropertyMock(return_value=target_obj))
-
-        return patch_object(source_obj, source_method, **mock_args)
+        pass
 
     def _patch_object_methods(self, obj, *methods, **kwargs):
-        original, patchers, mocks = self.inst_original, self.inst_patchers, self.inst_mocks
-
-        for method in methods:
-            key = self._key(method, obj=obj)
-
-            source_obj, source_method = self._get_source_method(obj, method)
-
-            if key not in original:
-                original[key] = getattr(source_obj, source_method)
-
-            if key not in patchers:
-                patcher = self._patch_method(method, source_obj, source_method)
-                patchers[key] = patcher
-                mocks[key] = patcher.start()
+        pass
 
 
 class ModelMocker(Mocker):
@@ -426,53 +313,25 @@ class ModelMocker(Mocker):
     default_methods = tuple(default_methods)
 
     def __init__(self, cls, *methods, **kwargs):
-        super().__init__(cls, *(self.default_methods + methods), **kwargs)
-
-        self.objects = MockSet(model=self.cls)
-        self.objects.on('added', self._on_added)
+        pass
 
     def __enter__(self):
-        result = super().__enter__()
-        return result
+        pass
 
     def _obj_pk(self, obj):
-        return getattr(obj, self.cls._meta.pk.attname, None)
+        pass
 
     def _on_added(self, obj):
-        pk = max([self._obj_pk(x) or 0 for x in self.objects] + [0]) + 1
-        setattr(obj, self.cls._meta.pk.attname, pk)
+        pass
 
     def _meta_base_manager__insert(self, objects, *_, **__):
-        obj = objects[0]
-        self.objects.add(obj)
-
-        return self._obj_pk(obj)
+        pass
 
     def _base_manager__insert(self, objects, *_, **__):
-        obj = objects[0]
-        self.objects.add(obj)
-
-        # Do not set anything on the model instance itself, as we do not get any values from the database.
-        # The object ID is being set automatically.
-        # Reference: `django.db.models.base.Model._save_table`
-        return []
+        pass
 
     def _do_update(self, *args, **_):
-        _, _, pk_val, values, _, _ = args
-        objects = self.objects.filter(pk=pk_val)
-
-        if objects.exists():
-            attrs = {field.attname: value for field, _, value in values if value is not None}
-            self.objects.update(**attrs)
-            return True
-        else:
-            return False
+        pass
 
     def delete(self, *_args, **_kwargs):
-        pk = self._obj_pk(self.objects[0])
-        if not pk:
-            raise ValueError(
-                f"{self.cls._meta.object_name} object can't be deleted because "
-                f'its {self.cls._meta.pk.attname} attribute is set to None.'
-            )
-        return self.objects.filter(pk=pk).delete()
+        pass

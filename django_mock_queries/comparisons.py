@@ -2,78 +2,72 @@ import re
 
 
 def exact_comparison(first, second):
-    return first == second
+    pass
 
 
 def iexact_comparison(first, second):
-    return first.lower() == second.lower()
+    pass
 
 
 def contains_comparison(first, second):
-    if isinstance(first, (list, tuple)):
-        return set(second).issubset(first)
-
-    return second in first
+    pass
 
 
 def icontains_comparison(first, second):
-    return second.lower() in first.lower()
+    pass
 
 
 def gt_comparison(first, second):
-    return first > second if first is not None else False
+    pass
 
 
 def gte_comparison(first, second):
-    return first >= second if first is not None else False
+    pass
 
 
 def lt_comparison(first, second):
-    return first < second if first is not None else False
+    pass
 
 
 def lte_comparison(first, second):
-    return first <= second if first is not None else False
+    pass
 
 
 def in_comparison(first, second):
-    if isinstance(first, list):
-        return bool(set(first).intersection(set(second)))
-
-    return first in second if first is not None else False
+    pass
 
 
 def startswith_comparison(first, second):
-    return first.startswith(second)
+    pass
 
 
 def istartswith_comparison(first, second):
-    return first.lower().startswith(second.lower())
+    pass
 
 
 def endswith_comparison(first, second):
-    return first.endswith(second)
+    pass
 
 
 def iendswith_comparison(first, second):
-    return first.lower().endswith(second.lower())
+    pass
 
 
 def isnull_comparison(first, second):
-    return (first is None) == bool(second)
+    pass
 
 
 def regex_comparison(first, second):
-    return re.search(second, first) is not None
+    pass
 
 
 def iregex_comparison(first, second):
-    return re.search(second, first, flags=re.I) is not None
+    pass
 
 
 def range_comparison(first, second):
-    return second[0] <= first <= second[1]
+    pass
 
 
 def overlap_comparison(first, second):
-    return bool(set(first).intersection(set(second)))
+    pass

@@ -18,92 +18,39 @@ class SerializerAssert:
         self._cls = cls
 
     def _get_obj(self):
-        obj = self._obj or baker.prepare(self._cls.Meta.model, _fill_optional=True)
-        return obj
+        pass
 
     def _get_attr(self, serializer, field):
-        if field.field_name in self._expected_values:
-            return self._expected_values[field.field_name]
-        try:
-            attribute = field.get_attribute(serializer.instance)
-
-            if attribute is not None:
-                attribute = field.to_representation(attribute)
-
-            return attribute
-        except SkipField:
-            return SkipField
+        pass
 
     def _get_values_patchers(self, serializer):
-        values = {}
-        patchers = []
-
-        for field in serializer._readable_fields:
-            if field.field_name not in self._mock_fields:
-                values[field.field_name] = self._get_attr(serializer, field)
-                continue
-
-            value = None
-            values[field.field_name] = value
-
-            patchers.append(patch.object(type(field), 'to_representation', Mock(return_value=value)))
-
-        return values, patchers
+        pass
 
     def _test_expected_fields(self, data, values):
-        for field in self._return_fields:
-            if field in values and values[field] == SkipField:
-                continue
-
-            assert field in data, \
-                'Field {} missing from serializer {}.'.format(field, self._cls)
-
-            assert data[field] == values[field], \
-                'Field {} equals {}, expected {}.'.format(field, data[field], values[field])
+        pass
 
     def _validate_args(self):
-        for field in self._mock_fields:
-            if field in self._expected_values:
-                raise AttributeError('Cannot specify expected value for a mocked field ({}.{}).'
-                                     .format(self._cls.Meta.model, field))
+        pass
 
     @property
     def serializer(self):
-        if not self._serializer:
-            obj = self._get_obj()
-            self._serializer = self._cls(obj)
-        return self._serializer
+        pass
 
     def instance(self, obj):
-        self._obj = obj
-        return self
+        pass
 
     def returns(self, *fields):
-        self._return_fields = fields
-        return self
+        pass
 
     def mocks(self, *fields):
-        self._mock_fields = fields
-        return self
+        pass
 
     def values(self, **attrs):
-        self._expected_values = attrs
-        return self
+        pass
 
     def run(self):
-        self._validate_args()
-
-        values, patchers = self._get_values_patchers(self.serializer)
-
-        try:
-            for patcher in patchers:
-                patcher.start()
-
-            self._test_expected_fields(self.serializer.data, values)
-        finally:
-            for patcher in patchers:
-                patcher.stop()
+        pass
 
 
 def assert_serializer(cls):
-    return SerializerAssert(cls)
+    pass
